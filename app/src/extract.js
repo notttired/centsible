@@ -4,7 +4,6 @@ import { handleNewTransfer } from "./transactions.js";
 const Tesseract = require(`tesseract.js`);
 
 export function Dropbox({ storedTransfers, setStoredTransfers, transferType }) {
-  const [imageReceipts, setImageReceipts] = useState();
   return (
     <div>
       Submit Receipts

@@ -115,16 +115,66 @@ function AddField({ newTransfer, setNewTransfer, fieldType }) {
   );
 }
 
-export function ListElements({ elements }) {
+export function ListElements({
+  elements,
+  transferType,
+  allFolders,
+  setAllFolders,
+}) {
   if (!elements) {
     return null;
   }
-  return elements.map((element) => (
-    <SingleElement
-      element={element}
-      key={`${element.source}${element.amount}${element.date}${element.recurrence}${element.completion}`}
-    />
-  ));
+  return elements.map(
+    (
+      element // element: a makeTransfer
+    ) => (
+      <div>
+        <SingleElement
+          element={element}
+          key={`${element.source}${element.amount}${element.date}${element.recurrence}${element.completion}`}
+        />
+        <ElementActions
+          transfer={element} // makeTransfer
+          allTransfers={elements} // [makeTransfer]
+          transferType={transferType} // key for allTransfers in allFolders
+          allFolders={allFolders}
+          setAllFolders={setAllFolders}
+        />
+      </div>
+    )
+  );
+}
+
+export function updateFolder(allFolders, setAllFolders, name, newFolder) {
+  const newAllFolders = { ...allFolders, [name]: newFolder };
+  setAllFolders(newAllFolders);
+  localStorage.setItem(name, JSON.stringify(newFolder));
+}
+
+export function deleteFolder(allFolders, setAllFolders, name) {
+  const newAllFolders = { ...allFolders };
+  delete newAllFolders[name];
+  setAllFolders(newAllFolders);
+  localStorage.setItem(name, null);
+}
+
+export function ElementActions({
+  transfer,
+  allTransfers,
+  transferType,
+  allFolders,
+  setAllFolders,
+}) {
+  function handleDeleteTransfer() {
+    let newTransfers = [...allTransfers];
+    newTransfers.splice(
+      newTransfers.findIndex((singleTransfer) => singleTransfer === transfer),
+      1 // make sure this works
+    );
+    updateFolder(allFolders, setAllFolders, transferType, newTransfers);
+  }
+  function handleUpdateTransfer() {}
+  return <button onClick={handleDeleteTransfer}>DEL</button>;
 }
 
 function SingleElement({ element }) {
