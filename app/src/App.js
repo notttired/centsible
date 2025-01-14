@@ -1,65 +1,84 @@
-import React, { useState } from "react";
-import "./App.css";
-import { store, getReceipts, getTransfers } from "./storage.js";
-import { Dropbox } from "./extract.js";
+import React, { useState, useContext, createContext } from "react";
+import {
+  store,
+  getTransfers,
+  sortTransfers,
+  retrieveData,
+} from "./functions/storage.js";
+
+import { Dropbox } from "./components/extract.js";
+
+import {
+  foldersContext,
+  transfersContext,
+  usernameContext,
+  fieldTypes,
+} from "./context.js";
+
 import {
   makeTransfer,
-  ListElements,
-  AddTransfer,
-  SortButton,
-} from "./transactions.js";
+  handleNewTransfer,
+  updateFolder,
+  deleteFolder,
+} from "./functions/handles.js";
 
-// storedReceipts will be an array of objects with names
-//objects have properties storeName, total, date, type
+import { AddTransfer } from "./components/forms.js";
+import { ListElements } from "./components/listElements.js";
+import { FolderHeader } from "./components/header.js";
+import checkmark from "./images/checkmark.png";
 
-// localStorage.setItem("income", JSON.stringify([makeTransfer(1, 1, 1, 1, 1)]));
-// NOTE: ADD FORM VALIDATION TO PREVENT DUPLICATION
-// ALWAYS LIST OUT TYPE OF ELEMENT USING COMMENT
+// More time: Add Expanding for groups, Add Color Coding, Add Sums of Information for groups, Add Notes to each
 
-// More time: Add Grouping, Add Color Coding, Add Sums of groups, Add Notes to each
-
-localStorage.setItem(
-  `namesOfAll`,
-  JSON.stringify(["income", "expenses", "newName"])
-);
-localStorage.setItem("newName", JSON.stringify([makeTransfer(1, 1, 1, 1, 1)]));
+// localStorage.setItem(
+//   `namesOfAll`,
+//   JSON.stringify(["Income", "Expenses", "NewName"])
+// );
+// localStorage.setItem("NewName", JSON.stringify([makeTransfer(1, 1, 1, 1, 1)]));
+// initialized and stores in localStorage
 
 export default function App() {
   const [namesOfAll, setNamesOfAll] = useState(
-    JSON.parse(localStorage.getItem(`namesOfAll`))
+    JSON.parse(localStorage.getItem(`namesOfAll`) || "[]")
   );
   const prevAllFolders = {};
-  for (let folderName of namesOfAll) {
-    prevAllFolders[folderName] = getTransfers(folderName);
+  console.log(`namesOfAll: ${JSON.stringify(namesOfAll)}`);
+  if (namesOfAll !== null && namesOfAll.length !== 0) {
+    for (let folderName of namesOfAll) {
+      prevAllFolders[folderName] = getTransfers(folderName);
+    }
   }
   const [allFolders, setAllFolders] = useState(prevAllFolders); // allFolders: {name: [makeTransfers]}
   console.log(JSON.stringify(allFolders));
 
   return (
-    <div>
-      <nav>Navigation</nav>
-      <AddFolder
-        namesOfAll={namesOfAll}
-        setNamesOfAll={setNamesOfAll}
-        allFolders={allFolders}
-        setAllFolders={setAllFolders}
-      />
-      <Display
-        namesOfAll={namesOfAll}
-        setNamesOfAll={setNamesOfAll}
-        allFolders={allFolders}
-        setAllFolders={setAllFolders}
-      />
+    <div className="appContainer">
+      <nav className="navContainer">
+        <MainNav />
+      </nav>
+      <foldersContext.Provider
+        value={{ namesOfAll, setNamesOfAll, allFolders, setAllFolders }}
+      >
+        <Display />
+        <AddFolder />
+      </foldersContext.Provider>
     </div>
   );
 }
 
-export function AddFolder({
-  namesOfAll,
-  setNamesOfAll,
-  allFolders,
-  setAllFolders,
-}) {
+function MainNav() {
+  const name = useContext(usernameContext);
+  return (
+    <ul className="mainNav">
+      <div className="navElement">Home</div>
+      <div className="navElement">Summary</div>
+      <h2 className="welcomeMessage">Welcome, {name}!</h2>
+    </ul>
+  );
+}
+
+function AddFolder() {
+  const { namesOfAll, setNamesOfAll, allFolders, setAllFolders } =
+    useContext(foldersContext);
   const [newName, setNewName] = useState("");
   function modifyAllFolders(newName) {
     const prevAllFolders = { ...allFolders, [newName]: [] };
@@ -67,36 +86,35 @@ export function AddFolder({
   }
 
   return (
-    <div>
-      <input
-        onChange={(e) => {
-          setNewName(e.target.value);
-        }}
-      />
-      <button
-        onClick={() => {
-          console.log(namesOfAll);
-          const newNames = [...namesOfAll];
-          newNames.push(newName);
-          store(newName, "namesOfAll");
-          setNamesOfAll(newNames);
-          modifyAllFolders(newName);
-          setNewName("");
-        }}
-      >
-        New
-      </button>
+    <div class="display">
+      <div id="addFolder" className="singleFolderDisplay">
+        <input
+          className="folderInput"
+          onChange={(e) => {
+            setNewName(e.target.value);
+          }}
+        />
+        <button
+          className="folderSubmit iconButton"
+          onClick={() => {
+            console.log(namesOfAll);
+            const newNames = [...namesOfAll];
+            newNames.push(newName);
+            store(newName, "namesOfAll");
+            setNamesOfAll(newNames);
+            modifyAllFolders(newName);
+            setNewName("");
+          }}
+        >
+          <img src={checkmark} alt="Submit"></img>
+        </button>
+      </div>
     </div>
   );
 }
 
-export function Display({
-  namesOfAll,
-  setNamesOfAll,
-  allFolders,
-  setAllFolders,
-}) {
-  console.log(JSON.stringify(allFolders));
+function Display() {
+  const { allFolders, setAllFolders } = useContext(foldersContext);
   function modifyFolder(folderKey) {
     return function (toBeSet) {
       const newAllFolders = { ...allFolders, [folderKey]: toBeSet }; // syntax
@@ -108,100 +126,35 @@ export function Display({
   for (const folderKey in allFolders) {
     const folder = allFolders[folderKey]; // [makeTransfer]
     const singleFolderDisplay = (
-      <div>
-        <Actions
-          transfers={folder}
-          setTransfers={modifyFolder(folderKey)}
-          transferType={folderKey}
-        />
-        <DisplayTransfers
-          namesOfAll={namesOfAll}
-          setNamesOfAll={setNamesOfAll}
-          allFolders={allFolders}
-          setAllFolders={setAllFolders}
-          transfers={folder}
-          transferType={folderKey}
-        />
+      <div className="singleFolderDisplay">
+        <transfersContext.Provider
+          value={{
+            transfers: folder,
+            transferType: folderKey,
+            setTransfers: modifyFolder(folderKey),
+          }}
+        >
+          <DisplayTransfers />
+        </transfersContext.Provider>
       </div>
     );
     displayedFolders.push(singleFolderDisplay);
   }
-  return <div>{displayedFolders}</div>;
+  return <div className="display">{displayedFolders}</div>;
 }
 
-export function DisplayTransfers({
-  namesOfAll,
-  setNamesOfAll,
-  allFolders,
-  setAllFolders,
-  transfers, // [makeTransfer]
-  transferType, // key for [makeTransfer] in allFolders
-}) {
+// transfers is one folder
+// transferType is the key to the folder
+// setTransfers is modifying the folder
+function DisplayTransfers() {
+  const { transfers, transferType } = useContext(transfersContext);
+  const [collapsed, setCollapsed] = useState(false);
   return (
-    <div>
-      <FolderHeader
-        namesOfAll={namesOfAll}
-        setNamesOfAll={setNamesOfAll}
-        allFolders={allFolders}
-        setAllFolders={setAllFolders}
-        transferType={transferType}
-      />
-      <ListElements
-        elements={transfers}
-        transferType={transferType}
-        allFolders={allFolders}
-        setAllFolders={setAllFolders}
-      />
-    </div>
-  );
-}
-
-export function FolderHeader({
-  namesOfAll,
-  setNamesOfAll,
-  allFolders,
-  setAllFolders,
-  transferType,
-}) {
-  console.log(JSON.stringify(namesOfAll));
-  function handleDeleteHeader() {
-    let newFolderNames = [...namesOfAll];
-    newFolderNames.splice(
-      newFolderNames.findIndex((name) => name === transferType),
-      1
-    );
-    localStorage.setItem(`namesOfAll`, JSON.stringify(newFolderNames));
-    setNamesOfAll(newFolderNames);
-    const newAllFolders = { ...allFolders };
-    delete newAllFolders[transferType];
-    setAllFolders(newAllFolders);
-  }
-  return (
-    <div>
-      <h1>{transferType}</h1>
-      <button onClick={handleDeleteHeader}>Delete</button>
-    </div>
-  );
-}
-
-export function Actions({ transfers, setTransfers, transferType }) {
-  return (
-    <div>
-      <AddTransfer
-        storedTransfers={transfers}
-        setStoredTransfers={setTransfers}
-        transferType={transferType}
-        openDialog={true} // change later
-      />
-      <SortButton
-        setStoredTransfers={setTransfers}
-        transferType={transferType}
-      />
-      <Dropbox
-        storedTransfers={transfers}
-        setStoredTransfers={setTransfers}
-        transferType={transferType}
-      />
+    <div className="displayTransfers">
+      <FolderHeader collapsed={collapsed} setCollapsed={setCollapsed} />
+      {!collapsed ? (
+        <ListElements elements={transfers} transferType={transferType} />
+      ) : null}
     </div>
   );
 }

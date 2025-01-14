@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { store, getReceipts, getTransfers } from "./storage.js";
-import { handleNewTransfer } from "./transactions.js";
+import { store, getReceipts, getTransfers } from "../functions/storage.js";
+import dropboxImg from "../images/dropbox.png";
+import { handleNewTransfer } from "../functions/handles.js";
 const Tesseract = require(`tesseract.js`);
 
 export function Dropbox({ storedTransfers, setStoredTransfers, transferType }) {
+  function handleSubmit() {
+    const form = document.querySelector("#fileDropbox");
+    form.click();
+  }
   return (
-    <div>
-      Submit Receipts
+    <div className="dropbox">
+      <button className="iconButton" onClick={handleSubmit}>
+        <img src={dropboxImg} alt="DropBox" />
+      </button>
       <input
+        id="fileDropbox"
         type="file"
         onChange={async (e) => {
           const images = e.target.files;
