@@ -55,7 +55,7 @@ app.get(
       { username: req.user.displayName },
       `${process.env.ACCESS_TOKEN_SECRET}`
     );
-    res.redirect(`http://localhost:5000?token=${token}`);
+    res.redirect(`/?token=${token}`); // added /
   }
 );
 
