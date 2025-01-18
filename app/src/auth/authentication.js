@@ -4,7 +4,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 const clientID = process.env.clientID;
-const clientSecret = process.env.clientID;
+const clientSecret = process.env.clientSecret;
 
 passport.use(
   new GoogleStrategy(

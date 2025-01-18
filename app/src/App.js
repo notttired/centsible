@@ -69,9 +69,18 @@ function MainNav() {
   const name = useContext(usernameContext);
   return (
     <ul className="mainNav">
+      <a href="http://localhost:5000/logout">
+        <h2
+          onClick={() => {
+            localStorage.setItem("token", "");
+          }}
+          className="welcomeMessage"
+        >
+          {name || "Logout"}
+        </h2>
+      </a>
       <div className="navElement">Home</div>
       <div className="navElement">Summary</div>
-      <h2 className="welcomeMessage">Welcome, {name}!</h2>
     </ul>
   );
 }

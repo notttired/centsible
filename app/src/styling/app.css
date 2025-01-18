@@ -1,10 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+html {
+  height: 100%;
+}
+
 body {
+  height: 100%;
   margin: 0;
   font-family: "DM Sans";
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f8f7;
 }
 
 code {
@@ -12,20 +19,31 @@ code {
     monospace;
 }
 
+.appContainer {
+  background-color: #f8f8f7;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
 .navContainer {
   width: 100%;
+  height: 80px;
 
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
+  background-color: white;
 }
 
 .mainNav {
-  height: 100px;
-  width: 90%;
+  height: 80px;
+  width: 100%;
 
-  border-bottom: 1px solid black;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -40,9 +58,8 @@ code {
 
 .welcomeMessage {
   font-size: 1em;
-
   position: absolute;
-  top: 40px;
+  top: 15px;
   left: 50px;
 }
 
@@ -55,22 +72,38 @@ code {
 }
 
 .display {
+  max-width: 800px;
+  width: 80%;
   margin: 50px 100px;
+
+  display: flex;
+  flex-flow: column nowrap;
 }
 
 .singleFolderDisplay {
+  flex: 1 1 auto;
+
+  min-width: 0;
   margin: 10px;
   padding: 10px;
 
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+  background-color: white;
 
-  border: 2px solid black;
+  border: 1px solid black;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   border-radius: 5px;
 }
 
+.displayTransfers {
+  width: 100%;
+  flex: 1 1 1;
+}
+
 .folderHeader {
+  margin: 0 20px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
@@ -99,25 +132,32 @@ code {
 }
 
 .listElements {
+  flex: 1 1 auto;
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .fullElement {
+  flex: 1 1 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
+}
+
+.fullElement:hover {
+  background-color: rgba(211, 211, 211, 0.5);
 }
 
 .singleElement {
+  flex: 1 1 0;
   margin: 10px;
 
   font-size: 1em;
   border-radius: 5px;
-  border: 1px solid black;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   display: flex;
   flex-flow: row nowrap;
@@ -125,10 +165,11 @@ code {
 
 .singlePart {
   height: 30px;
-  width: 120px;
+
   font-weight: 500;
 
   border: 1px solid black;
+  flex: 1 1 auto;
   display: flex;
   justify-content: center;
   align-items: center;

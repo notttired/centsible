@@ -50,6 +50,7 @@ app.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/auth/failure" }),
   (req, res) => {
+    console.log("Creating Token");
     const token = jwt.sign(
       { username: req.user.displayName },
       `${process.env.ACCESS_TOKEN_SECRET}`
